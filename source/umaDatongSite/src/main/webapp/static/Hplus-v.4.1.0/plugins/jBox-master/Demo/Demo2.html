@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>jBox Demos</title>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0">
+
+<link rel="stylesheet" href="../Source/jBox.css">
+
+
+<!-- 
+<script src="https://code.jquery.com/jquery-3.2.1.js"></script>
+ -->
+ 
+<script src="http://192.168.159.131:8080/umafrmsite/static/Hplus-v.4.1.0/js/jquery.min.js?v=2.1.4"></script>
+
+<script src="../Source/jBox.js"></script>
+<header>
+
+</header>
+
+<main class="container">
+
+<h2>Tooltip</h2>
+
+
+
+<h2>Modal</h2>
+
+<div class="targets-wrapper">
+<div id="Modal-1" class="target-click">Click me</div>
+<div id="Modal-2" class="target-click">Click me</div>
+<div id="Modal-3" class="btn">Click me</div>
+<div class="target-click" data-confirm onclick="new jBox('Notice', {content: 'Yay! You clicked the confirm button', color: 'green', attributes: {y: 'bottom'}})">Click me</div>
+</div>
+
+
+
+</main>
+
+
+
+<script src="./Demo.js"></script>
+
+<script type="text/javascript">
+
+
+new jBox('Modal', {
+  attach: '#Modal-2',
+  width: 350,
+  height: 200,
+  blockScroll: false,
+  animation: 'zoomIn',
+  draggable: 'title',
+  closeButton: true,
+  content: 'You can move this modal window',
+  title: 'Click here to drag me around',
+  overlay: false,
+  reposition: false,
+  repositionOnOpen: false
+});
+
+
+new jBox('Modal', {
+  attach: '#Modal-3',
+  width: 450,
+  height: 250,
+  closeButton: 'title',
+  animation: false,
+  title: 'AJAX request',
+  ajax: {
+    url: 'https://ajaxresponse.com/2',
+    data: {
+      id: '1982',
+      name: 'Stephan Wagner'
+    },
+    reload: 'strict',
+    setContent: false,
+    beforeSend: function() {
+      this.setContent('');
+      this.setTitle('<div class="ajax-sending">Sending AJAX request...</div>');
+    },
+    complete: function(response) {
+      this.setTitle('<div class="ajax-complete">AJAX request complete</div>');
+    },
+    success: function(response) {
+      this.setContent('<div class="ajax-success">Response:<tt>' + response + '</tt></div>');
+    },
+    error: function() {
+      this.setContent('<div class="ajax-error">Oops, something went wrong</div>');
+    }
+  }
+});
+
+</script>
+
+</body>
+</html>

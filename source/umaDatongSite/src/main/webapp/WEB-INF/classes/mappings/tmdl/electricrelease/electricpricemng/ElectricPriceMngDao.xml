@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.umasoft.umafrmsite.modules.tmdl.electricrelease.dao.electricpricemng.ElectricPriceMngDao">
+    
+	<sql id="electricPriceMngColumns">
+		a.id AS "id",
+
+		S.id AS "unitid.id",
+		S.name AS "unitid.name",
+		a.pingp AS "pingp",
+		a.fengp AS "fengp",
+		a.gup AS "gup",
+		a.dlp AS "dlp",
+		a.zmp AS "zmp",
+		a.xlp AS "xlp",
+		a.wzgp AS "wzgp",
+		a.taxrate AS "taxrate",
+		a.username AS "username",
+		a.addtime  AS "addtime",
+		a.sl AS "sl",
+		a.flatprice AS "flatprice",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		u.name AS "updateBy.name",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="electricPriceMngJoins">
+	  RIGHT JOIN TMDL_USER_COMPANY S ON	S. ID = a.UNITID
+	  LEFT JOIN SYS_USER u ON u.id=a.update_by
+	</sql>
+    
+	<select id="get" resultType="ElectricPriceMng">
+		SELECT 
+			<include refid="electricPriceMngColumns"/>
+		FROM tmdl_electricity_tariff a
+		<include refid="electricPriceMngJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<sql id="groupByColumns">
+		a.id,
+		
+		a.unitid,
+	
+		a.pingp,
+		a.fengp,
+		a.gup,
+		a.dlp ,
+		a.zmp,
+		a.xlp,
+		a.wzgp,
+		a.taxrate,
+
+		a.addtime,
+		a.username,
+		a.sl,
+		a.flatprice,
+		a.create_by ,
+		a.create_date,
+		a.update_by ,
+		a.update_date,
+		a.remarks,
+		
+		a.del_flag
+	</sql>
+	
+	<select id="findList" resultType="ElectricPriceMng">
+	SELECT 
+		<include refid="electricPriceMngColumns"/> 
+		FROM(
+		select * from(
+		select * from tmdl_electricity_tariff  a 
+		<where>
+			(a.del_flag = #{DEL_FLAG_NORMAL}  OR a.del_flag IS NULL )
+			<if test="addtime != null and addtime != ''">
+			   
+					<if test="getprice == 1">
+						<if test="dbName == 'oracle'">
+							<![CDATA[			
+							AND   trunc(a.addtime, 'mm') <= trunc(#{addtime}, 'mm') 
+							]]>
+						</if>
+						<if test="dbName == 'mysql'">
+							<![CDATA[	
+							AND ( DATE_FORMAT(a.addtime, '%Y-%m') <= DATE_FORMAT(#{addtime}, '%Y-%m') 
+							]]>  
+						</if>
+					</if>
+					<if test="getprice == 2">
+						<if test="dbName == 'oracle'">
+							<![CDATA[			
+							AND   trunc(a.addtime, 'mm') = trunc(#{addtime}, 'mm') 
+							]]>
+						</if>
+						<if test="dbName == 'mysql'">
+							<![CDATA[	
+							AND ( DATE_FORMAT(a.addtime, '%Y-%m') = DATE_FORMAT(#{addtime}, '%Y-%m')   
+							]]>
+						</if>
+					</if>
+			</if>
+		</where>
+		)a	
+		<if test="getprice != 3"> <!-- 查询所有电价，不需要取最近电价 -->
+		WHERE not exists(select 1 from 
+		(
+		select * from tmdl_electricity_tariff  a 
+		<where>
+			(a.del_flag = #{DEL_FLAG_NORMAL}  OR a.del_flag IS NULL )
+			<if test="addtime != null and addtime != ''">
+			   
+					<if test="getprice == 1">
+						<if test="dbName == 'oracle'">
+							<![CDATA[			
+							AND   trunc(a.addtime, 'mm') <= trunc(#{addtime}, 'mm') 
+							]]>
+						</if>
+						<if test="dbName == 'mysql'">
+							<![CDATA[	
+							AND ( DATE_FORMAT(a.addtime, '%Y-%m') <= DATE_FORMAT(#{addtime}, '%Y-%m') 
+							]]>  
+						</if>
+					</if>
+					<if test="getprice == 2">
+						<if test="dbName == 'oracle'">
+							<![CDATA[			
+							AND   trunc(a.addtime, 'mm') = trunc(#{addtime}, 'mm') 
+							]]>
+						</if>
+						<if test="dbName == 'mysql'">
+							<![CDATA[	
+							AND ( DATE_FORMAT(a.addtime, '%Y-%m') = DATE_FORMAT(#{addtime}, '%Y-%m')   
+							]]>
+						</if>
+					</if>
+			</if>
+		</where>
+		)	<![CDATA[ WHERE a.UNITID = UNITID and a.ADDTIME<ADDTIME)  ]]>
+		</if>
+		)a 
+		<include refid="electricPriceMngJoins"/>
+		<where>
+		s.del_flag = #{DEL_FLAG_NORMAL}
+		<if test="unitid != null and unitid.id != null and unitid.id != ''">
+				AND s.id = #{unitid.id}
+			</if>
+		</where>	
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY s.update_date DESC
+			</otherwise>
+		</choose>
+      
+    </select>  
+	
+	<select id="findList1" resultType="ElectricPriceMng">
+	SELECT 
+      <include refid="electricPriceMngColumns"/>
+     from(
+		SELECT 
+			 <include refid="groupByColumns"/>
+		FROM tmdl_electricity_tariff a
+		
+		<where>
+			(a.del_flag = #{DEL_FLAG_NORMAL}  OR a.del_flag IS NULL )
+			
+			<if test="addtime != null and addtime != ''">
+			
+				<if test="dbName == 'oracle'">
+					AND ( trunc(a.addtime, 'mm') = trunc(#{addtime}, 'mm')   
+				 </if>
+				 <if test="dbName == 'mysql'">
+				 AND ( DATE_FORMAT(a.addtime, '%Y-%m') = DATE_FORMAT(#{addtime}, '%Y-%m')   
+				  </if>
+					OR a.addtime IS NULL)
+			</if>
+			<if test="addtime == null or addtime == ''">
+			   <![CDATA[
+			   AND not exists(select 1 from tmdl_electricity_tariff where a.UNITID = UNITID AND a.ADDTIME < ADDTIME) 
+			   ]]>
+			</if>
+		</where>
+		
+		) a
+		<include refid="electricPriceMngJoins"/>
+		<where>
+		s.del_flag = #{DEL_FLAG_NORMAL}
+		<if test="unitid != null and unitid.id != null and unitid.id != ''">
+				AND s.id = #{unitid.id}
+			</if>
+		</where>	
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY s.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	
+	
+	<select id="findAllList" resultType="ElectricPriceMng">
+		SELECT 
+			<include refid="electricPriceMngColumns"/>
+		FROM tmdl_electricity_tariff a
+		<include refid="electricPriceMngJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO tmdl_electricity_tariff(
+			id,
+			unitid,
+			pingp,
+			fengp,
+			gup,
+			dlp,
+			zmp,
+			xlp,
+			wzgp,
+			taxrate,
+			addtime,
+			changedtime,
+			username,
+			sl,
+			flatprice,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{unitid.id},
+			#{pingp},
+			#{fengp},
+			#{gup},
+			#{dlp},
+			#{zmp},
+			#{xlp},
+			#{wzgp},
+			#{taxrate},
+			#{addtime},
+			#{changedtime},
+			#{username},
+			#{sl},
+			#{flatprice},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE tmdl_electricity_tariff SET 	
+			unitid = #{unitid.id},
+			pingp = #{pingp},
+			fengp = #{fengp},
+			gup = #{gup},
+			dlp = #{dlp},
+			zmp = #{zmp},
+			xlp = #{xlp},
+			wzgp = #{wzgp},
+			taxrate = #{taxrate},
+			addtime = #{addtime},
+			changedtime = #{changedtime},
+			username = #{username},
+			sl = #{sl},
+			flatprice = #{flatprice},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE tmdl_electricity_tariff SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

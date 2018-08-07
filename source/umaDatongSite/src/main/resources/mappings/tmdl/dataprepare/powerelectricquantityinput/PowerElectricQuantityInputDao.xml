@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.umasoft.umafrmsite.modules.tmdl.dataprepare.dao.powerelectricquantityinput.PowerElectricQuantityInputDao">
+    
+	<sql id="powerElectricQuantityInputColumns">
+		a.id AS "id",
+		a.shunt_id AS "shuntId.id",
+		p.kgbh AS "shuntId.kgbh",
+		p.name AS "shuntId.name",
+		s.NAME AS "shuntId.bdzid.name",
+		a.wattfulgross AS "wattfulgross",
+		a.peaksegment AS "peaksegment",
+		a.grainsegment AS "grainsegment",
+		a.flatsegment AS "flatsegment",
+		a.pluswatt AS "pluswatt",
+		a.resewatt AS "resewatt",
+		a.demnum AS "demnum",
+		a.idleroll AS "idleroll",
+		a.anti_reactive_power AS "antiReactivePower",
+		a.time AS "time",
+		a.lastbase AS "lastbase",
+		a.nowbase AS "nowbase",
+		a.days AS "days",
+		a.lastpower AS "lastpower",
+		a.abversionpoe AS "abversionpoe",
+		a.demand AS "demand",
+		a.insert_flag AS "insertFlag",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		u.name AS "updateBy.name",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="powerElectricQuantityInputJoins">
+	LEFT JOIN tmdl_power_shunt p ON p.id=a.shunt_id
+	LEFT JOIN tmdl_substation s ON s.id=p.bdzid
+	LEFT JOIN SYS_USER u ON u.id=a.update_by
+	</sql>
+    
+	<select id="get" resultType="PowerElectricQuantityInput">
+		SELECT 
+			<include refid="powerElectricQuantityInputColumns"/>
+		FROM tmdl_power a
+		<include refid="powerElectricQuantityInputJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="PowerElectricQuantityInput">
+		SELECT 
+			<include refid="powerElectricQuantityInputColumns"/>
+		FROM tmdl_power a
+		<include refid="powerElectricQuantityInputJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="insertFlag != null  and insertFlag != ''">
+				AND a.insert_flag = #{insertFlag}
+			</if>
+			<if test="time != null and time != ''">
+				AND trunc(a.time, 'mm') = trunc(#{time}, 'mm') 
+			</if>
+			<if test="shuntId != null and shuntId.id != null and shuntId.id != ''">
+				AND a.shunt_id = #{shuntId.id}
+			</if>
+			<if test="shuntId != null and shuntId.name != null and shuntId.name != ''">
+				AND p.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{shuntId.name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{shuntId.name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{shuntId.name},'%')</if>
+			</if>
+			<if test="shuntId != null and shuntId.kgbh != null and shuntId.kgbh != ''">
+				AND p.kgbh like
+				<if test="dbName == 'oracle'">'%'||#{shuntId.kgbh}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{shuntId.kgbh}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{shuntId.kgbh},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="PowerElectricQuantityInput">
+		SELECT 
+			<include refid="powerElectricQuantityInputColumns"/>
+		FROM tmdl_power a
+		<include refid="powerElectricQuantityInputJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO tmdl_power(
+			id,
+			shunt_id,
+			wattfulgross,
+			peaksegment,
+			grainsegment,
+			flatsegment,
+			pluswatt,
+			resewatt,
+			idleroll,
+			anti_reactive_power,
+			time,
+			insert_flag,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{shuntId.id},
+			#{wattfulgross},
+			#{peaksegment},
+			#{grainsegment},
+			#{flatsegment},
+			#{pluswatt},
+			#{resewatt},
+			#{idleroll},
+			#{antiReactivePower},
+			#{time},
+			#{insertFlag},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE tmdl_power SET 	
+			shunt_id = #{shuntId.id},
+			wattfulgross = #{wattfulgross},
+			peaksegment = #{peaksegment},
+			grainsegment = #{grainsegment},
+			flatsegment = #{flatsegment},
+			pluswatt = #{pluswatt},
+			resewatt = #{resewatt},
+			idleroll = #{idleroll},
+			anti_reactive_power = #{antiReactivePower},
+			time = #{time},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE tmdl_power SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

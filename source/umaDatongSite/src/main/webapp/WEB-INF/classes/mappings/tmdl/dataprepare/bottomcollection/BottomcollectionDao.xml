@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.umasoft.umafrmsite.modules.tmdl.dataprepare.dao.bottomcollection.BottomcollectionDao">
+    
+	<sql id="bottomcollectionColumns">
+		a.id AS "id",
+		q.id AS "shuntId.id",
+		q.name AS "shuntId.name",
+		q.kgbh AS "shuntId.kgbh",
+		a.wattfulgross AS "wattfulgross",
+		a.peaksegment AS "peaksegment",
+		a.grainsegment AS "grainsegment",
+		a.flatsegment AS "flatsegment",
+		a.pluswatt AS "pluswatt",
+		a.resewatt AS "resewatt",
+		a.demnum AS "demnum",
+		a.idleroll AS "idleroll",
+		a.anti_reactive_power AS "antiReactivePower",
+		to_char(a.time,'YYYY-MM') AS "time",
+		a.lastbase AS "lastbase",
+		a.nowbase AS "nowbase",
+		a.days AS "days",
+		a.lastpower AS "lastpower",
+		a.abversionpoe AS "abversionpoe",
+		a.demand AS "demand",
+		a.insert_flag AS "insertFlag",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="bottomcollectionJoins">
+		left join TMDL_POWER_SHUNT q on q.id=a.shunt_id
+	</sql>
+    
+	<select id="get" resultType="Bottomcollection">
+		SELECT 
+			<include refid="bottomcollectionColumns"/>
+		FROM tmdl_power a
+		<include refid="bottomcollectionJoins"/>
+		WHERE a.id =#{id}
+	</select>
+	
+	<select id="findList" resultType="Bottomcollection">
+		SELECT 
+			<include refid="bottomcollectionColumns"/>
+		FROM tmdl_power a
+		<include refid="bottomcollectionJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="shuntId != null and shuntId.id != null and shuntId.id != ''">
+				AND a.shunt_id = #{shuntId.id}
+			</if>
+			<if test="time != null and time != ''">
+				AND to_char(a.time,'YYYY-MM') = to_char(#{time},'YYYY-MM')
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Bottomcollection">
+		SELECT 
+			<include refid="bottomcollectionColumns"/>
+		FROM tmdl_power a
+		<include refid="bottomcollectionJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+
+
+	<insert id="branchinsert"  parameterType="com.umasoft.umafrmsite.modules.tmdl.dataprepare.entity.bottomcollection.ShuntBottom">
+
+		INSERT  INTO TMDL_D_BM_MID
+		(
+
+		SWITCHNUMBER,
+		DATADATETIME,
+		DATAPROPERTY,
+		SUBSTATIONID,
+		R0P1,
+		R0P2,
+		R0P3,
+		R0P4,
+		R0P5,
+		R0P6,
+		R0P7,
+		R0P8,
+		R1P1,
+		R1P2,
+		R1P3,
+		R1P4,
+		R1P5,
+		R1P6,
+		R1P7,
+		R1P8,
+		R2P1,
+		R2P2,
+		R2P3,
+		R2P4,
+		R2P5,
+		R2P6,
+		R2P7,
+		R2P8,
+		R3P1,
+		R3P2,
+		R3P3,
+		R3P4,
+		R3P5,
+		R3P6,
+		R3P7,
+		R3P8,
+		R4P1,
+		R4P2,
+		R4P3,
+		R4P4,
+		R4P5,
+		R4P6,
+		R4P7,
+		R4P8,
+		ZDXL)
+		VALUES 	(
+			#{switchnumber},
+			#{datadatetime},
+			#{dataproperty},
+			#{substationid},
+			#{r0p1},
+			#{r0p2},
+			#{r0p3},
+			#{r0p4},
+			#{r0p5},
+			#{r0p6},
+			#{r0p7},
+			#{r0p8},
+			#{r1p1},
+			#{r1p2},
+			#{r1p3},
+			#{r1p4},
+			#{r1p5},
+			#{r1p6},
+			#{r1p7},
+			#{r1p8},
+			#{r2p1},
+			#{r2p2},
+			#{r2p3},
+			#{r2p4},
+			#{r2p5},
+			#{r2p6},
+			#{r2p7},
+			#{r2p8},
+			#{r3p1},
+			#{r3p2},
+			#{r3p3},
+			#{r3p4},
+			#{r3p5},
+			#{r3p6},
+			#{r3p7},
+			#{r3p8},
+			#{r4p1},
+			#{r4p2},
+			#{r4p3},
+			#{r4p4},
+			#{r4p5},
+			#{r4p6},
+			#{r4p7},
+			#{r4p8},
+			#{zdxl}
+
+
+	<!--	<foreach item="item" index="index" collection="list"  separator="UNION ALL">
+		</foreach>-->
+
+		)
+	</insert>
+
+
+	<insert id="insert">
+		INSERT INTO tmdl_power(
+			id,
+			shunt_id,
+			wattfulgross,
+			peaksegment,
+			grainsegment,
+			flatsegment,
+			pluswatt,
+			resewatt,
+			idleroll,
+			anti_reactive_power,
+			lastbase,
+			nowbase,
+			time,
+			insert_flag,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{shuntId.id},
+			#{wattfulgross},
+			#{peaksegment},
+			#{grainsegment},
+			#{flatsegment},
+			#{pluswatt},
+			#{resewatt},
+			#{idleroll},
+			#{antiReactivePower},
+			#{lastbase},
+			#{nowbase},
+			#{time},
+			#{insertFlag},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE tmdl_power SET 	
+			shunt_id = #{shuntId.id},
+			wattfulgross = #{wattfulgross},
+			peaksegment = #{peaksegment},
+			grainsegment = #{grainsegment},
+			flatsegment = #{flatsegment},
+			pluswatt = #{pluswatt},
+			resewatt = #{resewatt},
+			idleroll = #{idleroll},
+			anti_reactive_power = #{antiReactivePower},
+			time = #{time},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE tmdl_power SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+
+
+
+    <select id="findDataByMonth" resultType="com.umasoft.umafrmsite.modules.tmdl.dataprepare.entity.bottomcollection.ShuntBottom">
+
+        select
+        switchnumber as "switchnumber" ,
+		datadatetime as "datadatetime",
+		dataproperty as "dataproperty",
+		substationid as "substationid",
+		R0p1 as "r0p1",
+		R0p2 as "r0p2",
+		R0p3 as "r0p3",
+		R0p4 as "r0p4",
+		R0p5 as "r0p5",
+		R0p6 as "r0p6",
+		R0p7 as "r0p7",
+		R0p8 as "r0p8",
+		R1p1 as "r1p1",
+		R1p2 as "r1p2",
+		R1p3 as "r1p3",
+		R1p4 as "r1p4",
+		R1p5 as "r1p5",
+		R1p6 as "r1p6",
+		R1p7 as "r1p7",
+		R1p8 as "r1p8",
+		R2p1 as "r2p1",
+		R2p2 as "r2p2",
+		R2p3 as "r2p3",
+		R2p4 as "r2p4",
+		R2p5 as "r2p5",
+		R2p6 as "r2p6",
+		R2p7 as "r2p7",
+		R2p8 as "r2p8",
+		R3p1 as "r3p1",
+		R3p2 as "r3p2",
+		R3p3 as "r3p3",
+		R3p4 as "r3p4",
+		R3p5 as "r3p5",
+		R3p6 as "r3p6",
+		R3p7 as "r3p7",
+		R3p8 as "r3p8",
+		R4p1 as "r4p1",
+		R4p2 as "r4p2",
+		R4p4 as "r4p4",
+		R4p5 as "r4p5",
+		R4p6 as "r4p6",
+		R4p8 as "r4p8",
+		ZDXL as "zdxl"
+		from TMDL_D_BM_MID a
+        where 1=1
+		<if test="first!=null AND first!=''">
+			AND to_char(a.DATADATETIME,'YYYY-MM-DD')=#{first}
+
+
+		</if>
+
+		<if test="kgbh!=null AND kgbh!=''">
+			AND a.SWITCHNUMBER=#{kgbh}
+
+
+		</if>
+
+
+
+
+
+    </select>
+
+
+	<select id="findData" resultType="com.umasoft.umafrmsite.modules.tmdl.dataprepare.entity.bottomcollection.ShuntBottom">
+
+		select
+		switchnumber as "switchnumber" ,
+		datadatetime as "datadatetime",
+		dataproperty as "dataproperty",
+		substationid as "substationid",
+		R0p1 as "r0p1",
+		R0p2 as "r0p2",
+		R0p3 as "r0p3",
+		R0p4 as "r0p4",
+		R0p5 as "r0p5",
+		R0p6 as "r0p6",
+		R0p7 as "r0p7",
+		R0p8 as "r0p8",
+		R1p1 as "r1p1",
+		R1p2 as "r1p2",
+		R1p3 as "r1p3",
+		R1p4 as "r1p4",
+		R1p5 as "r1p5",
+		R1p6 as "r1p6",
+		R1p7 as "r1p7",
+		R1p8 as "r1p8",
+		R2p1 as "r2p1",
+		R2p2 as "r2p2",
+		R2p3 as "r2p3",
+		R2p4 as "r2p4",
+		R2p5 as "r2p5",
+		R2p6 as "r2p6",
+		R2p7 as "r2p7",
+		R2p8 as "r2p8",
+		R3p1 as "r3p1",
+		R3p2 as "r3p2",
+		R3p3 as "r3p3",
+		R3p4 as "r3p4",
+		R3p5 as "r3p5",
+		R3p6 as "r3p6",
+		R3p7 as "r3p7",
+		R3p8 as "r3p8",
+		R4p1 as "r4p1",
+		R4p2 as "r4p2",
+		R4p4 as "r4p4",
+		R4p5 as "r4p5",
+		R4p6 as "r4p6",
+		R4p8 as "r4p8",
+		ZDXL as "zdxl"
+		from TMDL_D_BM_MID a
+		where a.dataproperty=1
+  		order by a.switchnumber,a.datadatetime desc
+
+
+	</select>
+
+
+
+
+
+
+	<select id="findFistMonth" resultType="com.umasoft.umafrmsite.modules.tmdl.dataprepare.entity.bottomcollection.DbnmIdEntity">
+		select MAX(a.DATADATETIME) first,MIN(a.DATADATETIME) next,a.SWITCHNUMBER as kgbh,a.SUBSTATIONID as stationid
+		from TMDL_D_BM_MID a where  to_char(a.DATADATETIME,'YYYY-MM')=#{time} GROUP BY a.SWITCHNUMBER,a.SUBSTATIONID
+
+	</select>
+
+	<select id="findshuit" resultType="com.umasoft.umafrmsite.modules.tmdl.oamanagement.entity.branchmnagement.TmdlPowerShunt">
+		SELECT ID as "id",BDZID as "bdzid.id",name as "name"  FROM TMDL_POWER_SHUNT WHERE KGBH=#{kgbh} and BDZID=#{stationid}
+
+	</select>
+</mapper>

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.umasoft.umafrmsite.modules.tmdl.electricrelease.dao.usercompanyelectsequence.UserCompanyElectSequenceDao">
+    
+	<sql id="userCompanyElectSequenceColumns">
+		a.id AS "id",
+		a.colgroupid AS "colgroupid.id",
+		g.name AS "colgroupid.name",
+		a.bdzid AS "bdzid.id",
+		s.name AS "bdzid.name",
+		a.code AS "code",
+		a.name AS "name",
+		a.company_no AS "companyNo",
+		a.standard_illumination AS "standardIllumination",
+		a.powercode AS "powercode",
+		a.ueleccode AS "ueleccode",
+		a.costcategory AS "costcategory",
+		a.ratio AS "ratio",
+		a.tollmethod AS "tollmethod",
+		a.addtime AS "addtime",
+		a.changetime AS "changetime",
+		a.isratio AS "isratio",
+		a.unit_sort AS "unitSort",
+		a.zmyd AS "zmyd",
+		a.sl AS "sl",
+		a.sfcyjs AS "sfcyjs",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		u.name AS "updateBy.name",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="userCompanyElectSequenceJoins">
+	LEFT JOIN TMDL_GROUP_COMPANY g ON g.id=a. colgroupid
+	LEFT JOIN TMDL_SUBSTATION s ON s.id=a.bdzid
+	LEFT JOIN SYS_USER u ON u.id=a.update_by
+	</sql>
+    
+	<select id="get" resultType="UserCompanyElectSequence">
+		SELECT 
+			<include refid="userCompanyElectSequenceColumns"/>
+		FROM tmdl_user_company a
+		<include refid="userCompanyElectSequenceJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="UserCompanyElectSequence">
+		SELECT 
+			<include refid="userCompanyElectSequenceColumns"/>
+		FROM tmdl_user_company a
+		<include refid="userCompanyElectSequenceJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="code != null and code != ''">
+				AND a.code LIKE 
+					<if test="dbName == 'oracle'">'%'||#{code}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{code}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{code},'%')</if>
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="UserCompanyElectSequence">
+		SELECT 
+			<include refid="userCompanyElectSequenceColumns"/>
+		FROM tmdl_user_company a
+		<include refid="userCompanyElectSequenceJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO tmdl_user_company(
+			id,
+			code,
+			name,
+			company_no,
+			standard_illumination,
+			powercode,
+			ueleccode,
+			costcategory,
+			ratio,
+			tollmethod,
+			isratio,
+			zmyd,
+			sl,
+			sfcyjs,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{code},
+			#{name},
+			#{companyNo},
+			#{standardIllumination},
+			#{powercode},
+			#{ueleccode},
+			#{costcategory},
+			#{ratio},
+			#{tollmethod},
+			#{isratio},
+			#{zmyd},
+			#{sl},
+			#{sfcyjs},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE tmdl_user_company SET 	
+			code = #{code},
+			name = #{name},
+			powercode = #{powercode},
+			ueleccode = #{ueleccode},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE tmdl_user_company SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

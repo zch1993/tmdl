@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.umasoft.umafrmsite.modules.tmdl.electricitydistribution.dao.findaccounting.TmdlaccountingDao">
+    
+	<sql id="tmdlaccountingColumns">
+		a.id AS "id",
+		a.WATTFULGROSS-a.LASTPOWER  as "zj",
+		a.wattfulgross AS "wattfulgross",
+		a.peaksegment AS "peaksegment",
+		a.grainsegment AS "grainsegment",
+		a.flatsegment AS "flatsegment",
+		a.pluswatt AS "pluswatt",
+		a.resewatt AS "resewatt",
+		a.demnum AS "demnum",
+		to_char( cast( a.time AS DATE ), 'yyyy-MM' )AS "time",
+		a.idleroll AS "idleroll",
+		a.anti_reactive_power AS "antiReactivePower",
+		a.lastbase AS "lastbase",
+		a.nowbase AS "nowbase",
+		a.days AS "days",
+		a.lastpower AS "lastpower",
+		a.abversionpoe AS "abversionpoe",
+		a.demand AS "demand",
+		a.insert_flag AS "insertFlag",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		u.id "unitId.id",
+		u.name "unitId.name"
+	</sql>
+	
+	<sql id="tmdlaccountingJoins">
+		 left join TMDL_USER_COMPANY u on a.UNIT_ID =u.id
+	</sql>
+    
+	<select id="get" resultType="Tmdlaccounting">
+		SELECT 
+			<include refid="tmdlaccountingColumns"/>
+		FROM tmdl_power_company a
+		<include refid="tmdlaccountingJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Tmdlaccounting">
+		SELECT 
+			<include refid="tmdlaccountingColumns"/>
+		FROM tmdl_power_company a
+		<include refid="tmdlaccountingJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			and u.del_flag=#{DEL_FLAG_NORMAL}
+			<if test="unitId != null and unitId.id !='' and unitId.id!=null">
+				AND a.unit_id = #{unitId.id}
+			</if>
+			<if test="time != null and time != ''">
+				AND to_char( cast( a.time AS DATE ), 'yyyy-MM' ) = #{time}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY to_char( cast( a.time AS DATE ), 'yyyy-MM' ) DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Tmdlaccounting">
+		SELECT 
+			<include refid="tmdlaccountingColumns"/>
+		FROM tmdl_power_company a
+		<include refid="tmdlaccountingJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY to_char( cast( a.time AS DATE ), 'yyyy-MM' ) DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO tmdl_power_company(
+			id,
+			unit_id,
+			wattfulgross,
+			peaksegment,
+			grainsegment,
+			flatsegment,
+			pluswatt,
+			resewatt,
+			demnum,
+			time,
+			idleroll,
+			anti_reactive_power,
+			lastbase,
+			nowbase,
+			days,
+			lastpower,
+			abversionpoe,
+			demand,
+			insert_flag,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{unitId},
+			#{wattfulgross},
+			#{peaksegment},
+			#{grainsegment},
+			#{flatsegment},
+			#{pluswatt},
+			#{resewatt},
+			#{demnum},
+			#{time},
+			#{idleroll},
+			#{antiReactivePower},
+			#{lastbase},
+			#{nowbase},
+			#{days},
+			#{lastpower},
+			#{abversionpoe},
+			#{demand},
+			#{insertFlag},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE tmdl_power_company SET 	
+			unit_id = #{unitId},
+			wattfulgross = #{wattfulgross},
+			peaksegment = #{peaksegment},
+			grainsegment = #{grainsegment},
+			flatsegment = #{flatsegment},
+			pluswatt = #{pluswatt},
+			resewatt = #{resewatt},
+			demnum = #{demnum},
+			time = #{time},
+			idleroll = #{idleroll},
+			anti_reactive_power = #{antiReactivePower},
+			lastbase = #{lastbase},
+			nowbase = #{nowbase},
+			days = #{days},
+			lastpower = #{lastpower},
+			abversionpoe = #{abversionpoe},
+			demand = #{demand},
+			insert_flag = #{insertFlag},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE tmdl_power_company SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

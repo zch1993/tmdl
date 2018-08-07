@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.umasoft.umafrmsite.modules.tmdl.paramset.dao.substationmng.TmdlSubstationDao">
+    
+	<sql id="tmdlSubstationColumns">
+		a.id AS "id",
+		a.code AS "code",
+		a.name AS "name",
+		a.interfaceid AS "interfaceid",
+		a.address AS "address",
+		a.typeid AS "typeid",		
+		a.voltageid AS "voltageid",
+		a.shortening AS "shortening",
+		a.isexaminedobject AS "isexaminedobject",
+		a.isphysicaldevices AS "isphysicaldevices",
+		a.addtime AS "addtime",
+		a.changetime AS "changetime",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		u.name AS "updateBy.name",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="tmdlSubstationJoins">
+	LEFT JOIN sys_user u ON u.id=a.update_by
+	</sql>
+    
+	<select id="get" resultType="TmdlSubstation">
+		SELECT 
+			<include refid="tmdlSubstationColumns"/>
+		FROM tmdl_substation a
+		<include refid="tmdlSubstationJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="TmdlSubstation">
+		SELECT 
+			<include refid="tmdlSubstationColumns"/>
+		FROM tmdl_substation a
+		<include refid="tmdlSubstationJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="code != null and code != ''">
+				AND a.code = #{code}
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="searchCompany != null and searchCompany != ''">
+			    AND a.id IN (
+			      SELECT a1.bdzid FROM tmdl_substation_company  a1
+			      LEFT JOIN TMDL_USER_COMPANY g ON g.id=a1.unitid
+			      WHERE  g.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{searchCompany}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{searchCompany}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{searchCompany},'%')</if> 
+					AND a1.bdzid = a.id AND a1.del_flag = #{DEL_FLAG_NORMAL}
+			    )
+				
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="TmdlSubstation">
+		SELECT 
+			<include refid="tmdlSubstationColumns"/>
+		FROM tmdl_substation a
+		<include refid="tmdlSubstationJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<sql id="dataSynchroColumns">
+		a.id AS "id",
+		t.id AS "code",
+		t.name AS "name",	
+		t.interfaceid AS "interfaceid",
+		t.address AS "address",
+		t.typeid AS "typeid",
+		t.companyid AS "companyid",
+		t.voltageid AS "voltageid",
+		t.shortening AS "shortening",
+		t.isexaminedobject AS "isexaminedobject",
+		t.isphysicaldevices AS "isphysicaldevices",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="dataSynchroJoins">
+	RIGHT JOIN P_SUBSTATION@MIDJC_LINK t ON t.id=a.code
+	</sql>
+	
+	<select id="dataSynchro" resultType="TmdlSubstation">
+		SELECT 
+			<include refid="dataSynchroColumns"/>
+		FROM tmdl_substation a
+		<include refid="dataSynchroJoins"/>
+		<where>
+			<![CDATA[
+			(a.del_flag = #{DEL_FLAG_NORMAL} OR a.del_flag IS NULL)
+			AND (a.ID IS NULL OR a.name <> t.name)
+			]]>
+		</where>		
+		
+	</select>
+	
+	<select id="getCount"  resultType="Integer">
+		SELECT 
+			COUNT(ID)
+		FROM tmdl_substation a
+		<where>
+			a.del_flag = '0'
+		</where>			
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO tmdl_substation(
+			id,
+			code,
+			name,			
+			address,
+			typeid,			
+			voltageid,
+			shortening,
+			isexaminedobject,
+			isphysicaldevices,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{code},
+			#{name},
+			#{address},
+			#{typeid},
+			#{voltageid},
+			#{shortening},
+			#{isexaminedobject},
+			#{isphysicaldevices},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE tmdl_substation SET 	
+			code = #{code},
+			name = #{name},
+			address = #{address},
+			typeid = #{typeid},
+			voltageid = #{voltageid},
+			shortening = #{shortening},
+			isexaminedobject = #{isexaminedobject},
+			isphysicaldevices = #{isphysicaldevices},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE tmdl_substation SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

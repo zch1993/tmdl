@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.umasoft.umafrmsite.modules.tmdl.oamanagement.dao.branchmnagement.TmdlPowerShuntDao">
+    
+	<sql id="tmdlPowerShuntColumns">
+		a.id AS "id",
+		a.kgbh AS "kgbh",
+		a.name AS "name",
+		a.status AS "status",
+		a.gateproperty AS "gateproperty",
+		a.voltage AS "voltage",
+		a.segmentname AS "segmentname",
+		a.bl AS "bl",
+		a.addtime AS "addtime",
+		a.dljj AS "dljj",
+		a.xl1jj AS "xl1jj",
+		a.xl2jj AS "xl2jj",
+		a.jsbs AS "jsbs",
+
+		a.unit_type AS "unitType",
+		a.kgbh1 AS "kgbh1",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		s.id AS "bdzid.id",
+		s.name AS "bdzid.name",
+		s.code as "bdzid.code",
+        e.id  as "unitId.id",
+        e.name as "unitId.name"
+	</sql>
+	
+	<sql id="tmdlPowerShuntJoins">
+		LEFT JOIN tmdl_substation s ON a.bdzid = s.id
+		LEFT JOIN tmdl_user_company e ON e.id = a.unit_id
+
+	</sql>
+    
+	<select id="get" resultType="TmdlPowerShunt">
+		SELECT 
+			<include refid="tmdlPowerShuntColumns"/>
+		FROM tmdl_power_shunt a
+		<include refid="tmdlPowerShuntJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="TmdlPowerShunt">
+		SELECT 
+			<include refid="tmdlPowerShuntColumns"/>
+		FROM tmdl_power_shunt a
+		<include refid="tmdlPowerShuntJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			and a.insert_flag=2
+			<if test="kgbh != null and kgbh != ''">
+				AND a.kgbh =  #{kgbh}					
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+
+			<if test=" bdzid != null and bdzid.id != null and bdzid.id != ''">
+				AND a.bdzid LIKE
+					<if test="dbName == 'oracle'">'%'||#{bdzid.id}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{bdzid.id}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{bdzid.id},'%')</if>
+			</if>
+
+			<if test=" unitId != null and unitId.id != null and unitId.id != ''">
+				AND a.unit_id LIKE
+				<if test="dbName == 'oracle'">'%'||#{unitId.id}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{unitId.id}+'%'</if>
+				<if test="dbName == 'mysql'">concat('%',#{unitId.id},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+
+	<select id="findallData" resultType="TmdlPowerShunt">
+		SELECT
+		<include refid="tmdlPowerShuntColumns"/>
+		FROM tmdl_power_shunt a
+		<include refid="tmdlPowerShuntJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			and a.insert_flag in(1,2)
+			<if test="kgbh != null and kgbh != ''">
+				AND a.kgbh =  #{kgbh}
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE
+				<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+				<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+
+			<if test=" bdzid != null and bdzid.id != null and bdzid.id != ''">
+				AND a.bdzid LIKE
+				<if test="dbName == 'oracle'">'%'||#{bdzid.id}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{bdzid.id}+'%'</if>
+				<if test="dbName == 'mysql'">concat('%',#{bdzid.id},'%')</if>
+			</if>
+
+			<if test=" unitId != null and unitId.id != null and unitId.id != ''">
+				AND a.unit_id LIKE
+				<if test="dbName == 'oracle'">'%'||#{unitId.id}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{unitId.id}+'%'</if>
+				<if test="dbName == 'mysql'">concat('%',#{unitId.id},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="TmdlPowerShunt">
+		SELECT 
+			<include refid="tmdlPowerShuntColumns"/>
+		FROM tmdl_power_shunt a
+		<include refid="tmdlPowerShuntJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			and a.insert_flag=2
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO tmdl_power_shunt(
+			id,
+			kgbh,
+			name,
+			bdzid,
+			bl,
+			addtime,
+			dljj,
+			xl1jj,
+			xl2jj,
+			jsbs,
+			unit_type,
+			unit_id,
+			kgbh1,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			insert_flag
+		) VALUES (
+			#{id},
+			#{kgbh},
+			#{name},
+			#{bdzid.id},
+			#{bl},
+			#{addtime},
+			#{dljj},
+			#{xl1jj},
+			#{xl2jj},
+			#{jsbs},
+			#{unitType},
+			#{unitId.id},
+			#{kgbh1},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			2
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE tmdl_power_shunt SET 	
+			kgbh = #{kgbh},
+			name = #{name},
+			bdzid = #{bdzid.id},
+			status = #{status},
+			gateproperty = #{gateproperty},
+			voltage = #{voltage},
+			segmentname = #{segmentname},
+			bl = #{bl},
+			addtime = #{addtime},
+			dljj = #{dljj},
+			xl1jj = #{xl1jj},
+			xl2jj = #{xl2jj},
+			jsbs = #{jsbs},
+			unit_type = #{unitType},
+			unit_id = #{unitId.id},
+			kgbh1 = #{kgbh1}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE tmdl_power_shunt SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+
+	<select id="dataSynchrobyFL" resultType="TmdlPowerShunt">
+		<if test="count!=null and count>0">
+			<![CDATA[
+			select t.switchnumber as "kgbh",
+			t.sequencenumber as"segmentname",
+			t.gateproperty as "gateproperty",
+			t.substationid as "bdzid",
+			t.STATUS as status,t.NAME as "name"
+			from   tmdl_power_shunt s ,P_MEASUREPOINT@MIDJC_LINK t
+
+			where
+			(s.ID IS NULL and t.SWITCHNUMBER <> s.KGBH  and  t.SUBSTATIONID<>s.BDZID )
+			]]>
+		</if>
+
+		<if test="count==0">
+			select A.SWITCHNUMBER as kgbh,A.SUBSTATIONID as "bdzid.id",A.NAME as name from  MIDJC.P_MEASUREPOINT A
+		</if>
+
+	</select>
+
+	<select id="count" resultType="int">
+		select count(1) count from  TMDL_POWER_SHUNT A
+	</select>
+
+	<select id="insertbz" resultType="TmdlPowerShunt">
+		select * count from  TMDL_POWER_SHUNT A  where KGBH =#{kgbh} AND BDZID=#{bdzid}
+	</select>
+
+	<select id="findfl" resultType="java.util.Map">
+
+select a.unit_id,E.ID companyID,E.NAME companyname,a.bdzid,s.id stationid,s.name stationname from  TMDL_POWER_SHUNT A
+LEFT JOIN tmdl_substation s ON a.bdzid = s.id
+		LEFT JOIN tmdl_user_company e ON e.id = a.unit_id
+
+	where a.ID=#{id}
+
+	</select>
+</mapper>

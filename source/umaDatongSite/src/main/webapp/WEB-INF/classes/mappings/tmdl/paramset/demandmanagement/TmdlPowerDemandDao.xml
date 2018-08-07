@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.umasoft.umafrmsite.modules.tmdl.paramset.dao.demandmanagement.TmdlPowerDemandDao">
+    
+	<sql id="tmdlPowerDemandColumns">
+		a.id AS "id",
+		a.unit_id AS "unitId",
+		a.station_id AS "stationId",
+		a.shunt_id AS "shuntId",
+		a.month AS "month",
+		a.demand AS "demand",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		uc.id as "unitId.id",
+		uc.name as "unitId.name",
+		s.id as "stationId.id",
+		s.name as "stationId.name",
+		ps.id as "shuntId.id",
+		ps.name as "shuntId.name"
+	</sql>
+	
+	<sql id="tmdlPowerDemandJoins">
+		left join tmdl_user_company uc on a.unit_id=uc.id
+		left join tmdl_substation s on a.station_id=s.id
+		left join tmdl_power_shunt ps on ps.id=a.shunt_id
+	</sql>
+    
+	<select id="get" resultType="TmdlPowerDemand">
+		SELECT 
+			<include refid="tmdlPowerDemandColumns"/>
+		FROM tmdl_power_demand a
+		<include refid="tmdlPowerDemandJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="TmdlPowerDemand">
+		SELECT 
+			<include refid="tmdlPowerDemandColumns"/>
+		FROM tmdl_power_demand a
+		<include refid="tmdlPowerDemandJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+
+			<if test="unitId != null and unitId.id != '' and  unitId.id !=null ">
+				AND a.unit_id = #{unitId.id}
+			</if>
+			<if test="stationId != null and stationId.id != '' and stationId.id !=null">
+				AND a.station_id = #{substation.id}
+			</if>
+			<if test="shuntId != null and shuntId.id != '' and  shuntId.id !=null">
+				AND a.shunt_id = #{shuntId.id}
+			</if>
+			<if test="month != null and month != ''">
+				AND a.month = #{month}
+			</if>
+
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="TmdlPowerDemand">
+		SELECT 
+			<include refid="tmdlPowerDemandColumns"/>
+		FROM tmdl_power_demand a
+		<include refid="tmdlPowerDemandJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO tmdl_power_demand(
+			id,
+			unit_id,
+			station_id,
+			shunt_id,
+			month,
+			demand,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{unitId.id},
+			#{stationId.id},
+			#{shuntId.id},
+			#{month},
+			#{demand},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+
+
+		)
+
+
+
+	</insert>
+	
+	<update id="update">
+		UPDATE tmdl_power_demand SET 	
+			unit_id = #{unitId.id},
+			station_id = #{stationId.id},
+			shunt_id = #{shuntId.id},
+			month = #{month},
+			demand = #{demand},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+
+
+	</update>
+	
+	<update id="delete">
+		UPDATE tmdl_power_demand SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

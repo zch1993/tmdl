@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.umasoft.umafrmsite.modules.tmdl.dataprepare.dao.manualdemand.ManualdemandDao">
+    
+	<sql id="manualdemandColumns">
+		a.id AS "id",
+		a.wattfulgross AS "wattfulgross",
+		a.peaksegment AS "peaksegment",
+		a.grainsegment AS "grainsegment",
+		a.flatsegment AS "flatsegment",
+		a.pluswatt AS "pluswatt",
+		a.resewatt AS "resewatt",
+		a.demnum AS "demnum",
+		a.idleroll AS "idleroll",
+		a.anti_reactive_power AS "antiReactivePower",
+		a.time AS "time",
+		a.lastbase AS "lastbase",
+		a.nowbase AS "nowbase",
+		a.days AS "days",
+		a.lastpower AS "lastpower",
+		a.abversionpoe AS "abversionpoe",
+		a.demand AS "demand",
+		a.insert_flag AS "insertFlag",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		q.id AS "shuntId.id",
+		q.name AS "shuntId.name",
+		q.kgbh AS "shuntId.kgbh"
+	</sql>
+	
+	<sql id="manualdemandJoins">
+
+		left join TMDL_POWER_SHUNT q on q.id=a.shunt_id
+	</sql>
+    
+	<select id="get" resultType="Manualdemand">
+		SELECT 
+			<include refid="manualdemandColumns"/>
+		FROM tmdl_power a
+		<include refid="manualdemandJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Manualdemand">
+		SELECT 
+			<include refid="manualdemandColumns"/>
+		FROM tmdl_power a
+		<include refid="manualdemandJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="shuntId != null and shuntId.id != null and shuntId.id != ''">
+				AND a.shunt_id = #{shuntId.id}
+			</if>
+			<if test="time != null and time != ''">
+				AND to_char(a.time,'YYYY-MM') = to_char(#{time},'YYYY-MM')
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Manualdemand">
+		SELECT 
+			<include refid="manualdemandColumns"/>
+		FROM tmdl_power a
+		<include refid="manualdemandJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO tmdl_power(
+			id,
+			shunt_id,
+			wattfulgross,
+			peaksegment,
+			grainsegment,
+			flatsegment,
+			pluswatt,
+			resewatt,
+			idleroll,
+			anti_reactive_power,
+			time,
+			insert_flag,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{shuntId.id},
+			#{wattfulgross},
+			#{peaksegment},
+			#{grainsegment},
+			#{flatsegment},
+			#{pluswatt},
+			#{resewatt},
+			#{idleroll},
+			#{antiReactivePower},
+			#{time},
+			#{insertFlag},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE tmdl_power SET 	
+			demand = #{demand},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE tmdl_power SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

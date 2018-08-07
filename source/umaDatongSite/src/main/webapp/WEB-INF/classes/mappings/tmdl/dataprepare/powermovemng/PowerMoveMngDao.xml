@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.umasoft.umafrmsite.modules.tmdl.dataprepare.dao.powermovemng.PowerMoveMngDao">
+    
+	<sql id="powerMoveMngColumns">
+		a.id AS "id",
+		a.unit_id AS "unitid.id",
+		s.name AS "unitid.name",
+		a.createtime AS "createtime",
+		a.ygzr AS "ygzr",
+		a.ygzc AS "ygzc",
+		a.wgzr AS "wgzr",
+		a.wgzc AS "wgzc",
+		a.xlzj AS "xlzj",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		u.name AS "updateBy.name",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="powerMoveMngJoins">
+		LEFT JOIN TMDL_USER_COMPANY s ON	s. ID = a.unit_id	
+		LEFT JOIN SYS_USER u ON u.id=a.update_by
+	</sql>
+    
+	<select id="get" resultType="PowerMoveMng">
+		SELECT 
+			<include refid="powerMoveMngColumns"/>
+		FROM tmdl_power_move a
+		<include refid="powerMoveMngJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="PowerMoveMng">
+		SELECT 
+			<include refid="powerMoveMngColumns"/>
+		FROM tmdl_power_move a
+		<include refid="powerMoveMngJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="unitid != null and unitid.name != null and unitid.name != ''">
+				AND s.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{unitid.name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{unitid.name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{unitid.name},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="PowerMoveMng">
+		SELECT 
+			<include refid="powerMoveMngColumns"/>
+		FROM tmdl_power_move a
+		<include refid="powerMoveMngJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO tmdl_power_move(
+			id,
+			unit_id,
+			createtime,
+			ygzr,
+			ygzc,
+			wgzr,
+			wgzc,
+			xlzj,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{unitid.id},
+			#{createtime},
+			#{ygzr},
+			#{ygzc},
+			#{wgzr},
+			#{wgzc},
+			#{xlzj},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE tmdl_power_move SET 	
+			unit_id = #{unitid.id},
+			createtime = #{createtime},
+			ygzr = #{ygzr},
+			ygzc = #{ygzc},
+			wgzr = #{wgzr},
+			wgzc = #{wgzc},
+			xlzj = #{xlzj},
+			remarks = #{remarks},
+			del_flag = #{delFlag}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE tmdl_power_move SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

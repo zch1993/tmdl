@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<template>
+	<name>viewForm</name>
+	<filePath>src/main/webapp/WEB-INF/views/${lastPackageName}/${moduleName}/${subModuleName}</filePath>
+	<fileName>${className}FormView.jsp</fileName>
+	<content><![CDATA[
+<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ include file="/WEB-INF/views/include/taglib.jsp"%>
+<html>
+<head>
+	<title>${functionNameSimple}管理</title>
+	<meta name="decorator" content="default"/>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			//$("#name").focus();
+			$("#inputForm").validate({
+				submitHandler: function(form){
+					toastr.info('正在提交，请稍等...');
+					form.submit();
+				},
+				errorContainer: "#messageBox",
+				errorPlacement: function(error, element) {
+					toastr.info("输入有误，请先更正。");
+					if (element.is(":checkbox")||element.is(":radio")||element.parent().is(".input-append")){
+						error.appendTo(element.parent().parent());
+					} else {
+						error.insertAfter(element);
+					}
+				}
+			});
+		});
+	</script>
+</head>
+<body>
+	<ul class="nav nav-tabs">
+		<li><a href="${r"${ctx}"}/${urlPrefix}/">${functionNameSimple}列表</a></li>
+		<li class="active"><a href="${r"${ctx}"}/${urlPrefix}/form?id=${"${"+className+".id}"}">${functionNameSimple}查看</a></li>
+	</ul>
+	<div class="wrapper wrapper-content animated fadeInRight">
+	 <div class="row">
+            <div class="col-sm-12">
+                <div class="float-e-margins">                    
+                    <div class="ibox-content">
+                    
+	<form:form id="inputForm" modelAttribute="${className}" action="${r"${ctx}"}/${urlPrefix}/save?searchUrlParam=${"$"}{searchUrlParam}" method="post" class="form-horizontal">
+		<form:hidden path="id"/>
+		<sys:message content="${r"${message}"}"/>		
+		<#list table.columnList as c>
+			<#if c.isEdit?? && c.isEdit == "1" && (c.isNotBaseField || c.simpleJavaField == 'remarks')>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">${c.comments}：</label>
+			<div class="col-sm-10">
+			<#if c.showType == "input">
+				<label class="control-label">${"$"}{${className}.${c.javaField}	}		</label>	
+			<#elseif c.showType == "textarea">
+				<label class="control-label">${"$"}{${className}.${c.javaField}	}</label>
+			<#elseif c.showType == "select">
+				<label class="control-label">${"$"}{fns:getDictLabel(${className}.${c.javaField},'${c.dictType}','1')}</label>
+			<#elseif c.showType == "checkbox">
+				<label class="control-label">${"$"}{fns:getDictLabels(${className}.${c.javaField},'${c.dictType}','')}</label>
+			<#elseif c.showType == "radiobox">
+				<label class="control-label"><form:radiobuttons path="${c.javaFieldId}" items="${"$"}{fns:getDictList('${c.dictType}')}" itemLabel="label" itemValue="value" htmlEscape="false" class="<#if c.isNull != "1">required</#if>" readonly="true/></label>
+			<#elseif c.showType == "dateselect">
+				<label class="control-label"><fmt:formatDate value="${"$"}{${className}.${c.javaFieldId}}" pattern="yyyy-MM-dd HH:mm:ss"/></label>
+			<#elseif c.showType == "userselect">
+				<label class="control-label">${"$"}{${className}.${c.javaFieldName}}</label>
+			<#elseif c.showType == "officeselect">
+				<label class="control-label">${"$"}{${className}.${c.javaFieldName}}</label>
+			<#elseif c.showType == "areaselect">
+				<label class="control-label">${"$"}{${className}.${c.javaFieldName}}</label>
+			<#elseif c.showType == "fileselect">
+					<label class="control-label">					
+					<div id="filelist${className}${c.javaFieldId}">
+					<script language="javascript">
+					var htext${className}${c.javaFieldId} = getFilePathFromFinder("${"$"}{${className}.${c.javaFieldId}}","filelist${className}${c.javaFieldId}");
+					document.write(decodeURIComponent(htext${className}${c.javaFieldId}));
+					</script>		
+					</div>			
+					</label>
+				
+			</#if>
+			
+			</div>
+		</div>
+			</#if>
+		</#list>
+		<div class="hr-line-dashed"></div>
+		<div class="form-group"><div class="col-sm-4 col-sm-offset-2">			
+			<input id="btnCancel" class="btn" type="button" value="返 回" onclick="history.go(-1)"/>
+		</div>
+		</div>
+	</form:form>
+	</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>]]>
+	</content>
+</template>

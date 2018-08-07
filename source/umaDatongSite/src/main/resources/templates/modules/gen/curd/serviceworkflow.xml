@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="utf-8"?>
+<template>
+	<name>service</name>
+	<filePath>src/main/java/${packageName}/${moduleName}/service/${subModuleName}</filePath>
+	<fileName>${ClassName}Service.java</fileName>
+	<content><![CDATA[
+/**
+ * Copyright &copy; 2009-2018 <a href="http://www.umasoft.com">umasoft</a> All rights reserved.
+ */
+package ${packageName}.${moduleName}.service<#if subModuleName != "">.${subModuleName}</#if>;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import org.activiti.engine.task.Task;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.collect.Maps;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.umasoft.umafrmsite.common.persistence.Page;
+import com.umasoft.umafrmsite.common.service.CrudService;
+import ${packageName}.${moduleName}.entity<#if subModuleName != "">.${subModuleName}</#if>.${ClassName};
+import ${packageName}.${moduleName}.dao<#if subModuleName != "">.${subModuleName}</#if>.${ClassName}Dao;
+
+import com.umasoft.umafrmsite.modules.act.entity.Act;
+import com.umasoft.umafrmsite.modules.act.service.ActTaskService;
+import com.umasoft.umafrmsite.modules.sys.entity.Office;
+import com.umasoft.umafrmsite.modules.sys.entity.User;
+import com.umasoft.umafrmsite.modules.sys.utils.UserUtils;
+import com.umasoft.umafrmsite.common.utils.StringUtils;
+
+/**
+ * ${functionName}Service
+ * @author ${functionAuthor}@umasoft
+ * @version ${functionVersion}
+ */
+@Service
+@Transactional(readOnly = true)
+public class ${ClassName}Service extends CrudService<${ClassName}Dao, ${ClassName}> {
+
+	@Autowired
+	private ActTaskService actTaskService;
+	
+	private String flowFormKey;
+	
+	public ${ClassName} get(String id) {
+		return super.get(id);
+	}
+	
+	public ${ClassName} getByProcInsId(String procInsId) {
+		return dao.getByProcInsId(procInsId);
+	}
+	
+	public void setFlowFormKey(String flowFormKey) {
+		this.flowFormKey = flowFormKey;
+	}
+	
+	public String getFlowFormKey() {
+		return this.flowFormKey;
+	}
+	
+	public List<${ClassName}> findList(${ClassName} ${className}) {
+		return super.findList(${className});
+	}
+	
+	public Page<${ClassName}> findPage(Page<${ClassName}> page, ${ClassName} ${className}) {
+		return super.findPage(page, ${className});
+	}
+	
+	@Transactional(readOnly = false)
+	public void save(${ClassName} ${className}) {
+		boolean startNewProcess = true;
+		boolean isNewRecord = false;
+		
+		
+		String procInsId = ${className}.getProcInsId();
+		
+		if (StringUtils.isBlank(${className}.getId())){ //如果主键没有，新建记录
+			if(!StringUtils.isBlank(procInsId)) {  // 如果工作流procinsid已经有了，从其他表单过来的工作流，这里继续工作流				
+				${className}.getAct().setProcInsId(procInsId);
+			}
+			${className}.preInsert();
+			dao.insert(${className});
+			startNewProcess = true;
+			isNewRecord = true;
+		}else { //保存记录
+			${className}.preUpdate();
+			dao.update(${className});
+			startNewProcess = false;
+		}
+		// 即使是新建的记录，如果procInsId不为空，这里不是启动新的工作流，而是继续前面的工作流	
+		if (isNewRecord && !StringUtils.isBlank(procInsId)){
+			startNewProcess = false;
+			
+		}
+			// 申请发起
+				if (startNewProcess){
+										
+					Map<String, Object> vars = Maps.newHashMap();
+					/*  // 需要设置参数时候修改
+					List<String> lstring = getOfficePrimaryPerson(${className});
+					
+					if(lstring != null && lstring.size()>0) {
+						String [] candidateUsers = new String[lstring.size()];
+						lstring.toArray(candidateUsers);
+						vars.put("departchargers", Arrays.asList(candidateUsers));
+					}else {
+						String [] candidateUsers = {};						
+						vars.put("departchargers", Arrays.asList(candidateUsers));
+					}	
+					*/
+					
+					
+					// 如果流程模型中起始节点、各个task节点没有配置formkey，就采用这个
+					// 这样可以一个流程图多个form页面使用
+					actTaskService.setActFormKey("/${urlPrefix}/form"); // 例如/oa/dayoff/oaDayoffApply/form     <<===  手工修改
+					 // 启动流程
+					//*
+					String procInsID = actTaskService.startProcess(
+							"对应流程编辑器中流程标识",  // 对应流程编辑器中流程标识    <<===  手工修改
+							"${table.name}",    // 数据库表名    << === 手工修改
+							${className}.getId(), 
+							"${functionName}",   //${className}.getTitle(),   // 工作流显示的标题    << === 手工修改
+							vars);
+					
+					${className}.setProcInsId(procInsID);
+					dao.updateInsId(${className});
+					assignProceesUser(${className});  // 为下一个task节点分配参与人员
+					
+				}
+				
+				// 重新编辑申请		
+				else{
+					Map<String, Object> vars = Maps.newHashMap();
+					
+					if (isNewRecord){ // 如果从上个表单过来的工作流，是新建的记录
+						${className}.getAct().setComment("提交表单");
+						// 新建记录时候把当前记录建立者设置为后面修改者
+						// taskDefKey在流程模型简历时候作为后面修改的参数
+						String taskDefKey = ${className}.getAct().getTaskDefKey();
+						vars.put(taskDefKey, UserUtils.getUser().getLoginName());  
+					}else {	//重新提交的记录
+						// yes表示重新申请，其他表示销毁不再申请
+						${className}.getAct().setComment(("1".equals(${className}.getAct().getFlag())?"[重申] ":"[销毁] ")+${className}.getAct().getComment());
+					}
+					// 完成流程任务
+					
+					vars.put("pass", ${className}.getAct().getFlag());
+					vars.put("flowFormKey", flowFormKey);
+					actTaskService.complete(${className}.getAct().getTaskId(), ${className}.getAct().getProcInsId(), 
+						${className}.getAct().getComment(), 
+						"${functionName}",  //${className}.getTitle(),   // 工作流显示的标题    << === 手工修改
+						vars);
+					assignProceesUser(${className});
+				}
+	}
+	
+	/**
+	 * 审核审批保存
+	 * @param ${className}
+	 */
+	@Transactional(readOnly = false)
+	public void auditSave(${ClassName} ${className}) {
+		
+		// 设置意见
+		${className}.getAct().setComment(("1".equals(${className}.getAct().getFlag())?"[同意] ":"[驳回] ")+${className}.getAct().getComment());
+		
+		if (!StringUtils.isBlank(${className}.getId())){ 
+			${className}.preUpdate();
+		}
+		
+
+		// 提交流程任务
+		Map<String, Object> vars = Maps.newHashMap();
+		vars.put("pass", ${className}.getAct().getFlag());
+		User user = ${className}.getUpdateBy();
+		if(user != null)
+		vars.put("userID", user.getLoginName());  
+		//vars.put("flowFormKey", flowFormKey);
+		
+		/*   // 当前task节点需要设置其他参数
+		List<String> lstring = getOfficePrimaryPerson(${className});
+		
+		if(lstring != null && lstring.size()>0) {
+			String [] candidateUsers = new String[lstring.size()];
+			lstring.toArray(candidateUsers);
+			vars.put("departchargers", Arrays.asList(candidateUsers));
+		}else {
+			String [] candidateUsers = {};						
+			vars.put("departchargers", Arrays.asList(candidateUsers));
+		}	
+		*/
+		
+		actTaskService.complete(${className}.getAct().getTaskId(), ${className}.getAct().getProcInsId(), ${className}.getAct().getComment(), vars);
+
+		assignProceesUser(${className});	 // 下一个task节点分配处理人
+
+	}
+	
+	@Transactional(readOnly = false)
+	public void delete(${ClassName} ${className}) {
+		super.delete(${className});
+	}
+	
+	@Transactional(readOnly = false)
+	public ArrayList<String> getOfficePrimaryPerson(${ClassName} ${className}){
+		Act act = ${className}.getAct();
+		String taskid = ${className}.getAct().getTaskId();
+		Task task = actTaskService.getTaskByID(taskid);
+		if(task == null)return null;
+		String taskDefKey = task.getTaskDefinitionKey();
+		if(taskDefKey.indexOf("moreapply") >= 0) { // 申请人补充材料单    << === 这部分代码手工修改
+			// IF 如果当前表单不是工作流的起始表单，从主表单中获得创建人设置为为task节点处理人 {
+			// MainEntityClass mainEntityClass = minaEntityClassService.get(${className}.getMianEntityId());
+			// User user = UserUtils.get(mainEntityClass.getUpdateBy().getId());			
+			// actTaskService.assignTaskUser(task, user.getLoginName());  
+			// }
+			// ELSE 否则把当前表单的创建人设置为task节点处理人 {
+			// User user = UserUtils.get(oaTestFlowOne.getUpdateBy().getId());			
+			//	actTaskService.assignTaskUser(task, user.getLoginName());  
+			// } 
+		}
+		Office office = null;		
+		
+		if(taskDefKey.indexOf("departapply") >= 0) {  // 申请部门提交数据
+			// IF 是需求部门，需要获得提交需求部门的部门信息         << === 这部分代码手工修改					
+			// MainEntityClass mainEntityClass = minaEntityClassService.get(${className}.getMianEntityId());
+			// User user = UserUtils.get(mainEntityClass.getUpdateBy().getId());	
+			// office = user.getOffice();  // 部门是申请人的部门
+		}else if(taskDefKey.indexOf("departlayer") >= 0) { 
+			// IF 当前表单具备申请部门字段，通过申请部门字段获得审批部门负责人                         << === 这部分代码手工修改
+			// Office office = ${className}.getApplyOffice();   // 当前表单的申请部门Office    
+			// ELSE 采用创建人的部门
+			User user = UserUtils.get(${className}.getUpdateBy().getId());
+			office = user.getOffice();		
+		}else if(taskDefKey.indexOf("departpersonal") >= 0) {     // 部门下面的具有权限的人与执行操作
+			office = new Office();
+			return actTaskService.getOfficeUsersByTask(office,taskDefKey,"${permissionPrefix}:edit");	
+		}else {
+			office = new Office();
+		}
+		
+		return actTaskService.getOfficeUsersByTask(office,taskDefKey);		
+	}
+	
+	
+	/**
+	 * 动态分配工作流的下一个节点的处理人
+	 * @param ${className}
+	 */
+	@Transactional(readOnly = false)
+	public void assignProceesUser(${ClassName} ${className}) {
+						
+		Act act = ${className}.getAct();
+		String taskid = ${className}.getAct().getTaskId();
+		
+		String procInsId = ${className}.getAct().getProcInsId();
+		if(StringUtils.isBlank(procInsId) &&  StringUtils.isNotBlank(${className}.getId())){
+			procInsId = ${className}.getProcInsId();
+		}
+		
+		List<Task> tasks = actTaskService.getNextTaskList(procInsId) ;
+		   
+		for(Task task:tasks){
+			if(StringUtils.isNotBlank(task.getAssignee() )) // 如果任务节点已经设定了任务处理人
+					continue;
+			//processEngine.getTaskService().setAssignee(task.getId(), fa.getAssignee());  
+			//processEngine.getTaskService().addCandidateUser(task.getId(), fa.getAssignee());
+			//processEngine.getTaskService().addCandidateGroup(task.getId(), fa.getRolegroup());
+			String taskDefKey = task.getTaskDefinitionKey();
+			
+			/*
+			if(taskDefKey.indexOf("moreapply") >= 0) { // 申请人补充材料单   << === 这部分代码手工修改	如果不需要删除
+				//MainEntity mainntity = mainntityService.get(${className}.getMainEntiyId());
+				//User user = UserUtils.get(mainntity.getUpdateBy().getId());			
+				//actTaskService.assignTaskUser(task, user.getLoginName());  
+			}
+			*/
+		
+			Office office = null;		
+			ArrayList<String> alist = null;
+			
+			if(taskDefKey.indexOf("departpersonal") >= 0) {   // 部门下面的具有权限的人与执行操作
+				office = new Office();
+				alist = actTaskService.getOfficeUsersByTask(office,taskDefKey,"${permissionPrefix}:edit");	
+			}else {			
+				if(taskDefKey.indexOf("departapply") >= 0) {  // 申请部门
+					// IF 是需求部门，需要获得提交需求部门的部门信息                                                    << === 这部分代码手工修改					
+					//MainEntity mainntity = mainntityService.get(${className}.getMainEntiyId());
+				//User user = UserUtils.get(mainntity.getUpdateBy().getId());	
+					//office = user.getOffice();
+				}else if(taskDefKey.indexOf("departlayer") >= 0) { 
+					// IF 当前表单具备申请部门字段，通过申请部门字段获得审批部门负责人                                 << === 这部分代码手工修改
+					// Office office = mainEntity.getApplyOffice();   // 当前表单的申请部门Office    
+					// ELSE 采用创建人的部门
+					User user = UserUtils.get(${className}.getUpdateBy().getId());
+					office = user.getOffice();		
+				}else {
+					office = new Office();
+				}
+				
+				alist = actTaskService.getOfficeUsersByTask(office, taskDefKey); 
+			}
+			if( alist!= null && alist.size() > 0) {
+				taskid = task.getId();
+				String [] candidateUsers = new String[alist.size()];
+				alist.toArray(candidateUsers);
+				actTaskService.assignProceesUser(task,candidateUsers);
+			}
+		}
+
+	}
+	
+}]]>
+	</content>
+</template>

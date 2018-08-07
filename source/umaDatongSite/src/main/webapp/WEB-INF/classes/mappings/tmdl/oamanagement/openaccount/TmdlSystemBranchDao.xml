@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.umasoft.umafrmsite.modules.tmdl.oamanagement.dao.openaccount.TmdlSystemBranchDao">
+    
+	<sql id="tmdlSystemBranchColumns">
+		a.id AS "id",
+		a.fixation AS "fixation",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		s.id AS "unitid.id",
+		s.name AS "unitid.name"
+	</sql>
+	
+	<sql id="tmdlSystemBranchJoins">
+		left join tmdl_user_company s on s.id=a.unitid
+	</sql>
+    
+	<select id="get" resultType="TmdlSystemBranch">
+		SELECT 
+			<include refid="tmdlSystemBranchColumns"/>
+		FROM tmdl_system_branch a
+		<include refid="tmdlSystemBranchJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="TmdlSystemBranch">
+		SELECT 
+			<include refid="tmdlSystemBranchColumns"/>
+		FROM tmdl_system_branch a
+		<include refid="tmdlSystemBranchJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+
+			<if test="unitid != null and unitid.id != null and unitid.id != ''">
+				AND a.unitid = #{unitid.id}
+			</if>
+
+			<if test="fixation != null and fixation != ''">
+				AND a.fixation LIKE 
+					<if test="dbName == 'oracle'">'%'||#{fixation}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{fixation}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{fixation},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="TmdlSystemBranch">
+		SELECT 
+			<include refid="tmdlSystemBranchColumns"/>
+		FROM tmdl_system_branch a
+		<include refid="tmdlSystemBranchJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO tmdl_system_branch(
+			id,
+			unitid,
+			fixation
+		) VALUES (
+			#{id},
+			#{unitid.id},
+			#{fixation}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE tmdl_system_branch SET 	
+			unitid = #{unitid.id},
+			fixation = #{fixation}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE tmdl_system_branch SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

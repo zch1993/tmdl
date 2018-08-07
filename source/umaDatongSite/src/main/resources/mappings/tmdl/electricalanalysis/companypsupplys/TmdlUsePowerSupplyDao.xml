@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.umasoft.umafrmsite.modules.tmdl.electricalanalysis.dao.companypsupplys.TmdlUsePowerSupplyDao">
+
+	<sql id="tmdlUsePowerSupplyColumns">
+		a.id AS "id",
+		s.id AS "sysid.id",
+		s.name AS "sysid.name",
+		a.time AS "time",
+		a.begintime AS "begintime",
+		a.endtime AS "endtime",
+		a.srdl AS "srdl",
+		a.loser AS "loser",
+		a.council AS "council",
+		a.coal AS "coal",
+		a.build AS "build",
+		a.notcoal AS "notcoal",
+		a.notproduce AS "notproduce",
+		a.llife AS "llife",
+		a.allcoal AS "allcoal",
+		a.allseep AS "allseep",
+		a.maxload AS "maxload",
+		a.meanload AS "meanload",
+		a.loadrate AS "loadrate",
+		a.pf AS "pf",
+		a.lljf AS "lljf",
+		a.wg AS "wg",
+		a.xbs AS "xbs",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+
+	<sql id="tmdlUsePowerSupplyJoins">
+    left join  tmdl_user_company s on a.sysid=s.id
+
+	</sql>
+
+	<select id="get" resultType="TmdlUsePowerSupply">
+		SELECT
+			<include refid="tmdlUsePowerSupplyColumns"/>
+		FROM tmdl_use_power_supply a
+		<include refid="tmdlUsePowerSupplyJoins"/>
+		WHERE a.id = #{id}
+
+	</select>
+
+	<select id="findList" resultType="TmdlUsePowerSupply">
+		SELECT
+			<include refid="tmdlUsePowerSupplyColumns"/>
+		FROM tmdl_use_power_supply a
+		<include refid="tmdlUsePowerSupplyJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+
+			<if test="sysid!= null and sysid.id != null and sysid.id != ''">
+				AND a.sysid LIKE
+					<if test="dbName == 'oracle'">'%'||#{sysid.id}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{sysid.id}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{sysid.id},'%')</if>
+			</if>
+			<if test="time != null and time != ''">
+				AND a.time = #{time}
+			</if>
+		</where>
+		and a.sysid=s.id
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findAllList" resultType="TmdlUsePowerSupply">
+		SELECT
+			<include refid="tmdlUsePowerSupplyColumns"/>
+		FROM tmdl_use_power_supply a
+		<include refid="tmdlUsePowerSupplyJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO tmdl_use_power_supply(
+			id,
+			sysid,
+			time,
+			begintime,
+			endtime,
+			srdl,
+			loser,
+			council,
+			coal,
+			build,
+			notcoal,
+			notproduce,
+			llife,
+			allcoal,
+			allseep,
+			maxload,
+			meanload,
+			loadrate,
+			pf,
+			lljf,
+			wg,
+			xbs,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{sysid.id},
+			#{time},
+			#{begintime},
+			#{endtime},
+			#{srdl},
+			#{loser},
+			#{council},
+			#{coal},
+			#{build},
+			#{notcoal},
+			#{notproduce},
+			#{llife},
+			#{allcoal},
+			#{allseep},
+			#{maxload},
+			#{meanload},
+			#{loadrate},
+			#{pf},
+			#{lljf},
+			#{wg},
+			#{xbs},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE tmdl_use_power_supply SET
+			sysid = #{sysid.id},
+			time = #{time},
+			begintime = #{begintime},
+			endtime = #{endtime},
+			srdl = #{srdl},
+			loser = #{loser},
+			council = #{council},
+			coal = #{coal},
+			build = #{build},
+			notcoal = #{notcoal},
+			notproduce = #{notproduce},
+			llife = #{llife},
+			allcoal = #{allcoal},
+			allseep = #{allseep},
+			maxload = #{maxload},
+			meanload = #{meanload},
+			loadrate = #{loadrate},
+			pf = #{pf},
+			lljf = #{lljf},
+			wg = #{wg},
+			xbs = #{xbs},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE tmdl_use_power_supply SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.umasoft.umafrmsite.modules.tmdl.paramset.dao.usercompanymng.SystemCollieryGroupDao">
+    
+	<sql id="systemCollieryGroupColumns">
+		a.id AS "id",
+		a.collieryname AS "collieryname",
+		a.unitid AS "unitid.id",
+		uc.name AS  "unitid.name",
+		a.ydbl AS "ydbl",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		u.name AS "updateBy.name",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="systemCollieryGroupJoins">
+	LEFT JOIN tmdl_user_company uc ON uc.id=a.unitid 
+	LEFT JOIN SYS_USER u ON u.id=a.update_by
+	</sql>
+    
+	<select id="get" resultType="SystemCollieryGroup">
+		SELECT 
+			<include refid="systemCollieryGroupColumns"/>
+		FROM tmdl_system_colliery_group a
+		<include refid="systemCollieryGroupJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="SystemCollieryGroup">
+		SELECT 
+			<include refid="systemCollieryGroupColumns"/>
+		FROM tmdl_system_colliery_group a
+		<include refid="systemCollieryGroupJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="collieryname != null and collieryname != ''">
+				AND a.collieryname LIKE 
+					<if test="dbName == 'oracle'">'%'||#{collieryname}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{collieryname}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{collieryname},'%')</if>
+			</if>
+			<if test="unitid != null and unitid.name != null and unitid.name != ''">
+				AND uc.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{unitid.name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{unitid.name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{unitid.name},'%')</if>
+			</if>
+			<if test="unitid != null and unitid.id != null and unitid.id != ''">
+				AND  a.unitid = #{unitid.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY #{page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findListByCompany" resultType="SystemCollieryGroup">
+		SELECT 
+			<include refid="systemCollieryGroupColumns"/>
+		FROM tmdl_system_colliery_group a
+		<include refid="systemCollieryGroupJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			
+			<if test="unitid != null and unitid.id != null and unitid.id != ''">
+				AND  = a.unitid = #{unitid.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="SystemCollieryGroup">
+		SELECT 
+			<include refid="systemCollieryGroupColumns"/>
+		FROM tmdl_system_colliery_group a
+		<include refid="systemCollieryGroupJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO tmdl_system_colliery_group(
+			id,
+			collieryname,
+			unitid,
+			ydbl,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{collieryname},
+			#{unitid.id},
+			#{ydbl},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE tmdl_system_colliery_group SET 	
+			collieryname = #{collieryname},
+			unitid = #{unitid.id},
+			ydbl = #{ydbl},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE tmdl_system_colliery_group SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<select id="findcompany" resultType="java.util.Map">
+		<![CDATA[
+SELECT
+	cc.name,
+	cc.id
+FROM
+	TMDL_USER_COMPANY cc,
+	TMDL_SYSTEM_COLLIERY_GROUP g
+WHERE
+	g.UNITID = cc.id ( + )
+	AND g.DEL_FLAG = 0
+GROUP BY
+	cc.name,
+	cc.id
+
+
+]]>
+
+
+	</select>
+	
+	<select id="findCollieryGroup" resultType="SystemCollieryGroup">
+
+		    select
+		    g.id AS "id",
+		    g.collieryname AS "collieryname",
+			g.ydbl AS "ydbl",
+			uc.id AS "unitid.id",
+			uc.name AS  "unitid.name"
+
+		    from TMDL_SYSTEM_COLLIERY_GROUP g
+			LEFT JOIN tmdl_user_company uc ON uc.id = g.UNITID
+where
+
+			 g.UNITID=#{unitid}
+
+
+		and  g.del_flag=0
+		    <!--<if test="name!=null ">
+
+				AND uc.name = #{name}
+
+
+			</if>
+
+			<if test="collieryname!=null ">
+
+				AND g.collieryname = #{collieryname}
+
+
+			</if>-->
+
+	</select>
+
+
+	<select id="findColliery" resultType="SystemCollieryGroup">
+
+		select
+		g.id AS "id",
+		g.collieryname AS "collieryname",
+		g.ydbl AS "ydbl",
+		uc.id AS "unitid.id",
+		uc.name AS  "unitid.name"
+
+		from TMDL_SYSTEM_COLLIERY_GROUP g
+		LEFT JOIN tmdl_user_company uc ON uc.id = g.UNITID
+		where
+
+		1=1
+
+
+		and  g.del_flag=0
+		<if test="unitname!=null and unitname !='' ">
+
+            AND trim(uc.name)= #{unitname}
+
+
+        </if>
+
+        <if test="collieryname!=null and collieryname !='' ">
+
+            AND g.collieryname = #{collieryname}
+
+
+        </if>
+
+	</select>
+	
+</mapper>

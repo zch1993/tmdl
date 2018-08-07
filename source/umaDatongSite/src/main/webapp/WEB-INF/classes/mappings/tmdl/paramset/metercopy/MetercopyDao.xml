@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.umasoft.umafrmsite.modules.tmdl.paramset.dao.metercopy.MetercopyDao">
+    
+	<sql id="metercopyColumns">
+		a.id AS "id",
+		a.kgbh AS "kgbh",
+		a.name AS "name",
+		a.bdzid AS "bdzid",
+		a.status AS "status",
+		a.gateproperty AS "gateproperty",
+		a.voltage AS "voltage",
+		a.segmentname AS "segmentname",
+		a.bl AS "bl",
+		a.addtime AS "addtime",
+		a.dljj AS "dljj",
+		a.xl1jj AS "xl1jj",
+		a.xl2jj AS "xl2jj",
+		a.jsbs AS "jsbs",
+		a.unit_type AS "unitType",
+		a.unit_id AS "unitId",
+		a.kgbh1 AS "kgbh1",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.insert_flag AS "insertFlag"
+	</sql>
+	
+	<sql id="metercopyJoins">
+	</sql>
+    
+	<select id="get" resultType="Metercopy">
+		SELECT 
+			<include refid="metercopyColumns"/>
+		FROM tmdl_power_shunt a
+		<include refid="metercopyJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Metercopy">
+		SELECT 
+			<include refid="metercopyColumns"/>
+		FROM tmdl_power_shunt a
+		<include refid="metercopyJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			and a.insert_flag=1
+			<if test="kgbh != null and kgbh != ''">
+				AND a.kgbh LIKE 
+					<if test="dbName == 'oracle'">'%'||#{kgbh}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{kgbh}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{kgbh},'%')</if>
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Metercopy">
+		SELECT 
+			<include refid="metercopyColumns"/>
+		FROM tmdl_power_shunt a
+		<include refid="metercopyJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			and a.insert_flag=1
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO tmdl_power_shunt(
+			id,
+			kgbh,
+			name,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			insert_flag
+		) VALUES (
+			#{id},
+			#{kgbh},
+			#{name},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			1
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE tmdl_power_shunt SET 	
+			kgbh = #{kgbh},
+			name = #{name}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE tmdl_power_shunt SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

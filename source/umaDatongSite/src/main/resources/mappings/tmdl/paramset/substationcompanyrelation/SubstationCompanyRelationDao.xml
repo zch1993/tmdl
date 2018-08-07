@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.umasoft.umafrmsite.modules.tmdl.paramset.dao.substationcompanyrelation.SubstationCompanyRelationDao">
+    
+	<sql id="substationCompanyRelationColumns">
+		a.id AS "id",
+		a.unitid AS "unitid.id",
+		g.code AS "unitid.code",
+		g.name AS "unitid.name",
+		a.bdzid AS "bdzid.id",
+		s.name AS "bdzid.name",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="substationCompanyRelationJoins">
+	LEFT JOIN TMDL_USER_COMPANY g ON g.id=a.unitid
+	LEFT JOIN TMDL_SUBSTATION s ON s.id=a.bdzid
+	</sql>
+    
+	<select id="get" resultType="SubstationCompanyRelation">
+		SELECT 
+			<include refid="substationCompanyRelationColumns"/>
+		FROM tmdl_substation_company a
+		<include refid="substationCompanyRelationJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="SubstationCompanyRelation">
+		SELECT 
+			<include refid="substationCompanyRelationColumns"/>
+		FROM tmdl_substation_company a
+		<include refid="substationCompanyRelationJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="unitid != null and unitid.id != null and unitid.id != ''">
+				AND a.unitid = #{unitid.id}					
+			</if>
+			<if test="unitid != null and unitid.name != null and unitid.name != ''">
+				AND g.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{unitid.name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{unitid.name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{unitid.name},'%')</if>
+			</if>
+			<if test="bdzid != null and bdzid.name != null and bdzid.name != ''">
+				AND s.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{bdzid.name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{bdzid.name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{bdzid.name},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="SubstationCompanyRelation">
+		SELECT 
+			<include refid="substationCompanyRelationColumns"/>
+		FROM tmdl_substation_company a
+		<include refid="substationCompanyRelationJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO tmdl_substation_company(
+			id,
+			unitid,
+			bdzid,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{unitid.id},
+			#{bdzid.id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE tmdl_substation_company SET 	
+			unitid = #{unitid.id},
+			bdzid = #{bdzid.id},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE tmdl_substation_company SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE		  
+				 id = #{id}
+		
+	</update>
+		<update id="deleteBybdzid">
+		UPDATE tmdl_substation_company SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE
+		  <choose>
+			<when test="bdzid != null and bdzid.id != null and bdzidd.id != ''">
+				a.bdzid = #{bdzid.id}		
+			</when>
+			<otherwise>
+				 id = #{id}
+			</otherwise>
+		</choose>
+		 
+	</update>
+</mapper>
