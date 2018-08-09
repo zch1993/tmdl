@@ -54,7 +54,7 @@ public class SynchronTask {
         System.out.println("之后" +base.size());
     }
 
-    @Scheduled(cron = "0 36 15 ? * *")
+    //@Scheduled(cron = "0 36 15 ? * *")
     public void save(){
         String date="";
         long startTimes = System.currentTimeMillis();
