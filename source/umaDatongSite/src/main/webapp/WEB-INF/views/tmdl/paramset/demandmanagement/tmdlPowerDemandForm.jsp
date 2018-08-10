@@ -116,17 +116,8 @@
 								tablecolumn="name:分路名称"  searchcolumn="name" checked="true" multiSelect="false" onchangeCallback="loadinfo()"/>
 			
 			</div>
-			<label class="col-sm-2 control-label">年月<font color="red">(*)</font>：</label>
-			<div class="col-sm-4">
-				<input name="month" type="text" readonly="readonly" maxlength="20" class="form-control Wdate required"
-					   value="<fmt:formatDate value="${tmdlPowerDemand.month}" pattern="yyyy-MM"/>"
-					   onclick="WdatePicker({dateFmt:'yyyy-MM',isShowClear:false});"/>
 
-			</div>
-		</div>
-		<div class="form-group">
 
-		</div>
 		<div class="form-group">
 			<label class="col-sm-2 control-label">需量<font color="red">(*)</font>：</label>
 			<div class="col-sm-4">
