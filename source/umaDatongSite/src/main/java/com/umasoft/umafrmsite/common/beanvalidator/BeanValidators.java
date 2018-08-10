@@ -28,7 +28,6 @@ import com.google.common.collect.Maps;
  * @version 2013-01-15
  */
 public class BeanValidators {
-
 	/**
 	 * 调用JSR303的validate方法, 验证失败时抛出ConstraintViolationException.
 	 */
