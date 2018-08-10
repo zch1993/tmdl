@@ -2,7 +2,7 @@ package com.umasoft.umafrmsite.modules.tmdl.task;
 
 
 
-import com.sun.org.apache.bcel.internal.generic.NEW;
+
 import com.umasoft.umafrmsite.modules.tmdl._common.DateUtils;
 import com.umasoft.umafrmsite.modules.tmdl.synchronization.service.SynchronizationService;
 import com.umasoft.umafrmsite.modules.tmdl._common.SynchronThread;
@@ -29,30 +29,6 @@ public class SynchronTask {
     @Autowired
     private BottomcollectionService bottomcollectionService;
 
-
-    public static void main(String[] args) {
-        List<ShuntBottom>  synchronList=new ArrayList<ShuntBottom>();
-        ShuntBottom c =new ShuntBottom();
-        c.setDataproperty(1.0);
-        c.setSwitchnumber("1");
-        synchronList.add(c);
-
-        List<ShuntBottom>  base = new ArrayList<ShuntBottom>();
-        ShuntBottom c1 =new ShuntBottom();
-        c1.setDataproperty(1.0);
-        c1.setSwitchnumber("1");
-        ShuntBottom c2 =new ShuntBottom();
-        c2.setDataproperty(1.0);
-        c2.setSwitchnumber("3");
-        base.add(c1);
-        base.add(c2);
-
-        System.out.println("之前" +base.size());
-
-
-        base.removeAll(synchronList);
-        System.out.println("之后" +base.size());
-    }
 
     //@Scheduled(cron = "0 36 15 ? * *")
     public void save(){

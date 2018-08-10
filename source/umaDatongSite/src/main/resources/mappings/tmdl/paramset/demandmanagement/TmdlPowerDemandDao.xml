@@ -7,7 +7,6 @@
 		a.unit_id AS "unitId",
 		a.station_id AS "stationId",
 		a.shunt_id AS "shuntId",
-		a.month AS "month",
 		a.demand AS "demand",
 		a.create_by AS "createBy.id",
 		a.create_date AS "createDate",
@@ -54,9 +53,7 @@
 			<if test="shuntId != null and shuntId.id != '' and  shuntId.id !=null">
 				AND a.shunt_id = #{shuntId.id}
 			</if>
-			<if test="month != null and month != ''">
-				AND a.month = #{month}
-			</if>
+
 
 
 		</where>
@@ -94,7 +91,6 @@
 			unit_id,
 			station_id,
 			shunt_id,
-			month,
 			demand,
 			create_by,
 			create_date,
@@ -107,7 +103,6 @@
 			#{unitId.id},
 			#{stationId.id},
 			#{shuntId.id},
-			#{month},
 			#{demand},
 			#{createBy.id},
 			#{createDate},
@@ -128,7 +123,6 @@
 			unit_id = #{unitId.id},
 			station_id = #{stationId.id},
 			shunt_id = #{shuntId.id},
-			month = #{month},
 			demand = #{demand},
 			update_by = #{updateBy.id},
 			update_date = #{updateDate},

@@ -52,7 +52,10 @@
 		<div class="form-group">
 				<label class="control-label">单位名称：</label>
 				<div class="control-inline">
-				<form:input path="unitid.name" htmlEscape="false" maxlength="10" class="form-control"/>
+					<sys:itemselect id="unitid" name="unitid.id" value="${systemCollieryGroup.unitid.id}" labelName="unitid.name" labelValue="${systemCollieryGroup.unitid.name}"
+									title="用电用户" url="/paramset/usercompanymng/userCompany/listData?isratio=1" cssClass="required" allowClear="true"
+									tablecolumn="name:单位名称"  searchcolumn="name" checked="true" multiSelect="false"/>
+				<%--<form:input path="unitid.name" htmlEscape="false" maxlength="10" class="form-control"/>--%>
 			</div>
 			</div>
 			<div class="form-group">

@@ -23,7 +23,6 @@ public class TmdlPowerDemand extends DataEntity<TmdlPowerDemand> {
 	private UserCompany unitId;		// 用电单位
 	private TmdlSubstation stationId;		// 变电站
 	private TmdlPowerShunt shuntId;		// 分路
-	private Date month;		// 年月
 	private String demand;		// 需量
 
 	public TmdlPowerDemand() {
@@ -59,14 +58,7 @@ public class TmdlPowerDemand extends DataEntity<TmdlPowerDemand> {
 		this.shuntId = shuntId;
 	}
 
-	@JsonFormat(pattern = "yyyy-MM")
-	public Date getMonth() {
-		return month;
-	}
 
-	public void setMonth(Date month) {
-		this.month = month;
-	}
 
 	@Length(min=0, max=255, message="需量长度必须介于 0 和 255 之间")
 	public String getDemand() {

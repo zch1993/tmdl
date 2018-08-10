@@ -34,7 +34,7 @@ public class LogUtils {
 	
 	public static final String CACHE_MENU_NAME_PATH_MAP = "menuNamePathMap";
 	
-	private static LogDao logDao = SpringContextHolder.getBean(LogDao.class);
+	//private static LogDao logDao = SpringContextHolder.getBean(LogDao.class);
 	private static MenuDao menuDao = SpringContextHolder.getBean(MenuDao.class);
 	
 	/**
@@ -99,7 +99,7 @@ public class LogUtils {
 			}
 			// 保存日志信息
 			log.preInsert();
-			logDao.insert(log);
+			//logDao.insert(log);
 		}
 	}
 

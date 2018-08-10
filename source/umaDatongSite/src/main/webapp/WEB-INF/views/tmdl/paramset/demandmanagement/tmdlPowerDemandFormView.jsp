@@ -62,13 +62,7 @@
 			
 			</div>
 		</div>
-		<div class="form-group">
-			<label class="col-sm-2 control-label">年月：</label>
-			<div class="col-sm-10">
-				<fmt:formatDate value="${tmdlPowerDemand.month}" pattern="yyyy-MM-dd HH:mm:ss"/>
-			
-			</div>
-		</div>
+
 		<div class="form-group">
 			<label class="col-sm-2 control-label">需量：</label>
 			<div class="col-sm-10">
